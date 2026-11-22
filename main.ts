@@ -162,11 +162,14 @@ function run(p: Uint8Array, inp: Uint8Array): { o: Uint8Array; c: number } {
   }
 }
 
-const I = process.env.MAKEFUN_INPUT_DIR ?? '/input';
-const O = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const I = process.env.MAKEFUN_INPUT_DIR || '/input';
+const O = process.env.MAKEFUN_OUTPUT_DIR || '/output';
 for (const id of readdirSync(I).sort()) {
+  // One unreadable case must not kill the other 39: isolate each case's failure.
+  try {
   const r = run(readFileSync(join(I, id, 'program.bin')), readFileSync(join(I, id, 'input.bin')));
   mkdirSync(join(O, id), { recursive: true });
   writeFileSync(join(O, id, 'stdout.bin'), r.o);
   writeFileSync(join(O, id, 'exit.txt'), `${r.c}\n`);
+  } catch {}
 }
